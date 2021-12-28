@@ -1,0 +1,6 @@
+data/
+checkpoint/
+temp/
+__pycache__/
+*.py[cod]
+*$py.class

@@ -1,0 +1,29 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: test.py",
+            "type": "python",
+            "request": "launch",
+            "program": "test.py",
+            // "args": ["-d", "h36m", "-k", "cpn_ft_h36m_dbb", "-arc", "3,3,3,3,3", "--evaluate","epochfinal_80.bin","--num-joints-in","17","--num-joints-out","17"],
+            "args": ["-d", "h36m_24", "-k", "gt", "-arc", "3,3,3,3,3", "--evaluate", "epochfinal_60.bin", "--num-joints-in", "24", "--num-joints-out", "24", "--render", "--viz-video", "test.mp4", "--viz-output", "result.mp4"],
+            "console": "integratedTerminal"
+            // python train.py -e 60 -d h36m -k cpn_ft_h36m_dbb -arc 3,3,3,3,3 --randnum 50 --resume epochfinal_50.bin
+            // python test.py  -d  h36m   -k   cpn_ft_h36m_dbb   -arc   3,3,3,3,3   --evaluate epochfinal_80.bin --num-joints-in 17 --num-joints-out 17
+            // python test.py  -d  h36m_24   -k  gt   -arc   3,3,3,3,3   --evaluate epochfinal_60.bin --num-joints-in 24 --num-joints-out 24
+            // python test.py  -d  h36m_24   -k  gt   -arc   3,3,3,3,3   --evaluate epochfinal_60.bin --num-joints-in 24 --num-joints-out 24 --render --viz-video test.mp4 --viz-output result.mp4
+        },
+        {
+            "name": "Python: demo.py",
+            "type": "python",
+            "request": "launch",
+            "program": "demo.py",
+            "console": "integratedTerminal"
+        }
+
+    ]
+}
