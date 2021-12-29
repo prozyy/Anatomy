@@ -1,7 +1,10 @@
-data/
+data/testData
+data/h36m*
 checkpoint/
 temp/
+delete/
 __pycache__/
 *.py[cod]
 *$py.class
 *.mp4
+*.npz
