@@ -1,3 +1,6 @@
+import sys,os
+curFolder,fileName = os.path.split(os.path.realpath(__file__))
+sys.path.append(curFolder)
 from common.model import TemporalModel
 import torch
 import os
