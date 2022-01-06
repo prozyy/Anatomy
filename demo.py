@@ -9,6 +9,7 @@ import matplotlib
 matplotlib.use('Agg')
 # matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
+import time
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
@@ -72,11 +73,16 @@ class Anatomy3DPose:
         checkpoint = torch.load(weightPath, map_location=lambda storage, loc: storage)
         self.model.load_state_dict(checkpoint['model_pos'])
 
-    def inference(self, poseDic, frameIndex):
+    def inference(self, poseDic, frameIndex, f=840, distanse=3000):
         result_trackId = []
         input_keypoints_all = None
+        body_root_list = []
         for k, v in poseDic.items():
             cur_keypoints = v
+            body_cx = (v[0,11,0] + v[0,12,0]) / 2
+            body_cy = (v[0,11,1] + v[0,12,1]) / 2
+            body_root_3d = [(body_cx - self.res_w / 2) / f * distanse,(body_cy - self.res_h / 2) / f * distanse,distanse]
+            body_root_list.append(body_root_3d)
             cur_keypoints[..., :2] = normalize_screen_coordinates(v[..., :2], w=self.res_w, h=self.res_h)
             if k in self.poseData:
                 pose2darray = self.poseData[k]["point2darr"]
@@ -104,19 +110,31 @@ class Anatomy3DPose:
             inputs_2d = inputs_2d.cuda()
 
         predicted_3d_pos = self.model(inputs_2d)
-
-        return result_trackId, predicted_3d_pos.squeeze(0).squeeze(0).detach().cpu().numpy()
+        body_root_arr = np.array(body_root_list)
+        npose = body_root_arr.shape[0]
+        body_root_arr = body_root_arr.reshape(npose,1,1,3).repeat(24,axis=2)
+        pose3d_result = predicted_3d_pos.detach().cpu().numpy() + body_root_arr / 1000
+        return result_trackId, pose3d_result
 
 if __name__ == "__main__":
-    anatomyModel = Anatomy3DPose("checkpoint/epochfinal_60.bin",(1200,1780))
+    anatomyModel = Anatomy3DPose("checkpoint/epochfinal_80.bin",(1200,1780))
     input_keypoints = np.load("data/testData/test.npy").transpose(0,2,1)
     if not os.path.exists("temp"):
         os.mkdir("temp")
+    time_all = []
     for i in range(input_keypoints.shape[0]):
-        trackIdList, pose3d = anatomyModel.inference({"1":input_keypoints[i:(i+1),:,:]}, i)
-
+        
+        start = time.time()
+        trackIdList, pose3d = anatomyModel.inference({"1":input_keypoints[i:(i+1),:,:],"2":input_keypoints[i:(i+1),:,:],"3":input_keypoints[i:(i+1),:,:],"4":input_keypoints[i:(i+1),:,:],"5":input_keypoints[i:(i+1),:,:],"6":input_keypoints[i:(i+1),:,:],"7":input_keypoints[i:(i+1),:,:],"8":input_keypoints[i:(i+1),:,:]}, i)
+        # trackIdList, pose3d = anatomyModel.inference({"1":input_keypoints[i:(i+1),:,:]}, i)
         print(pose3d.shape)
-        fig = plot_pose3d(pose3d.transpose())
+        end = time.time()
+        print("time cost:",end - start)
+        time_all.append(end - start)
+        
+        # print(pose3d.shape)
+        # fig = plot_pose3d(pose3d.transpose())
 
-        if i % 10 == 0:
-            fig.savefig("temp/"+"frame_"+ str(i) + ".png")
+        # if i % 10 == 0:
+        #     fig.savefig("temp/"+"frame_"+ str(i) + ".png")
+    print("avg time cost:",np.mean(np.array(time_all)))
